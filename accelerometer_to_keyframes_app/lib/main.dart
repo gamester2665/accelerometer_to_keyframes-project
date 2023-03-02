@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 
 void main() {
   runApp(const MyApp());
@@ -38,35 +38,17 @@ class AccelerometerChartScreen extends StatefulWidget {
 }
 
 class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
-  List<charts.Series<TimeSeriesAccelerometerData, DateTime>> _seriesData = [];
-  List<TimeSeriesAccelerometerData> _data = [];
+  List<ChartSampleData> _data = [];
 
   @override
   void initState() {
     super.initState();
-    _data = <TimeSeriesAccelerometerData>[];
-    _seriesData = <charts.Series<TimeSeriesAccelerometerData, DateTime>>[];
-    _seriesData.add(charts.Series(
-      id: 'Accelerometer',
-      data: _data,
-      domainFn: (TimeSeriesAccelerometerData data, _) => data.time,
-      measureFn: (TimeSeriesAccelerometerData data, _) => data.value,
-    ));
-
-    // Listen for accelerometer events and update the chart data.
+    _data = <ChartSampleData>[];
     accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
-        _data.add(TimeSeriesAccelerometerData(DateTime.now(), event.z));
+        _data.add(ChartSampleData(DateTime.now(), event.z));
       });
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    // Stop listening for accelerometer events when the widget is disposed.
-    accelerometerEvents.drain();
   }
 
   @override
@@ -77,11 +59,15 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
       ),
       body: Center(
         child: Container(
-          padding: EdgeInsets.all(8),
-          child: charts.TimeSeriesChart(
-            _seriesData,
-            animate: true,
-            dateTimeFactory: const charts.LocalDateTimeFactory(),
+          child: SfCartesianChart(
+            primaryXAxis: DateTimeAxis(),
+            series: <ChartSeries<ChartSampleData, DateTime>>[
+              LineSeries<ChartSampleData, DateTime>(
+                dataSource: _data,
+                xValueMapper: (ChartSampleData data, _) => data.time,
+                yValueMapper: (ChartSampleData data, _) => data.value,
+              ),
+            ],
           ),
         ),
       ),
@@ -89,9 +75,9 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
   }
 }
 
-class TimeSeriesAccelerometerData {
+class ChartSampleData {
   final DateTime time;
   final double value;
 
-  TimeSeriesAccelerometerData(this.time, this.value);
+  ChartSampleData(this.time, this.value);
 }
