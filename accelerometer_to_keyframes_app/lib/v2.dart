@@ -54,14 +54,6 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
         _dataList[2].add(ChartSampleData(now, event.z));
 
         _latestEvent = event;
-
-        // for _exxx
-        // Only keep the last _maxDataCount values
-        // if (_dataList[0].length > _maxDataCount) {
-        //   for (int i = 0; i < 3; i++) {
-        //     _dataList[i].removeAt(0);
-        //   }
-        // }
       });
     });
   }
@@ -76,28 +68,6 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
       ];
     });
   }
-
-  // List<Widget> _exxx() {
-  //   return [
-  //     Text('Max Data Points: '),
-  //     SizedBox(width: 10),
-  //     DropdownButton<int>(
-  //         value: _maxDataCount,
-  //         onChanged: (value) {
-  //           setState(() {
-  //             _maxDataCount = value!;
-  //           });
-  //         },
-  //         items: _maxDataCountList.map(
-  //           (int value) {
-  //             return DropdownMenuItem(
-  //               value: value,
-  //               child: Text(value.toString()),
-  //             );
-  //           },
-  //         ).toList()),
-  //   ];
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -188,11 +158,11 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
                   ),
                   Text(_duration.toString()),
                   if (_latestEvent != null) ...[
-                    Text(_latestEvent!.x.toString(),
+                    Text(_latestEvent!.x.ceilToDouble().toString(),
                         style: TextStyle(color: _lineColors[0])),
-                    Text(_latestEvent!.y.toString(),
+                    Text(_latestEvent!.y.ceilToDouble().toString(),
                         style: TextStyle(color: _lineColors[1])),
-                    Text(_latestEvent!.z.toString(),
+                    Text(_latestEvent!.z.toDouble().toString(),
                         style: TextStyle(color: _lineColors[2])),
                   ]
                 ],
