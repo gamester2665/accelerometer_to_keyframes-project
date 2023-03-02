@@ -30,8 +30,10 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
     Colors.green, // for y values
     Colors.blue, // for z values
   ];
+  DateTime _startTime = DateTime.now();
 
   int _maxDataCount = 30;
+  List<int> _maxDataCountList = [30, 60, 90, 100];
 
   @override
   void initState() {
@@ -56,114 +58,121 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
     });
   }
 
+  void _resetStartTime() {
+    setState(() {
+      _startTime = DateTime.now();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Accelerometer Chart'),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: LineChart(
-              LineChartData(
-                lineTouchData: LineTouchData(enabled: false),
-                gridData: FlGridData(
-                  show: true,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Colors.grey,
-                      strokeWidth: 0.5,
-                    );
-                  },
-                  getDrawingVerticalLine: (value) {
-                    return FlLine(
-                      color: Colors.grey,
-                      strokeWidth: 0.5,
-                    );
-                  },
-                ),
-                titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                      showTitles: true,
-
-                      getTitlesWidget: (double value, TitleMeta meta) {
-                        // Convert value to DateTime
-                        DateTime time = _dataList[0][value.toInt()].time;
-                        // Format time as HH:mm:ss
-                        return Text(
-                            '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}');
-                      },
-                      // margin: 8
-                    )),
-                    leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 2,
-                      // textStyle: TextStyle(
-                      //   fontSize: 12,
-                      //   color: Colors.grey,
-                      // ),
-                      // margin: 10,
-                    ))),
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border.all(
-                    color: Colors.grey,
-                    width: 0.5,
+      backgroundColor: Colors.white,
+      // appBar: AppBar(
+      //   title: Text('Accelerometer Chart'),
+      // ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: LineChart(
+                LineChartData(
+                  lineTouchData: LineTouchData(enabled: false),
+                  gridData: FlGridData(
+                    show: true,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey,
+                        strokeWidth: 0.5,
+                      );
+                    },
+                    getDrawingVerticalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey,
+                        strokeWidth: 0.5,
+                      );
+                    },
                   ),
-                ),
-                lineBarsData: [
-                  for (int i = 0; i < 3; i++)
-                    LineChartBarData(
-                      spots: _dataList[i].asMap().entries.map((entry) {
-                        return FlSpot(entry.key.toDouble(), entry.value.value);
-                      }).toList(),
-                      isCurved: true,
-                      color: _lineColors[i],
-                      barWidth: 2,
-                      dotData: FlDotData(
-                        show: true,
-                      ),
+                  titlesData: FlTitlesData(
+                      bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                        showTitles: true,
+
+                        getTitlesWidget: (double value, TitleMeta meta) {
+                          // Convert value to DateTime
+                          DateTime time = _dataList[0][value.toInt()].time;
+                          // Format time as HH:mm:ss
+                          return Text(
+                              '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}');
+                        },
+                        // margin: 8
+                      )),
+                      leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 2,
+                        // textStyle: TextStyle(
+                        //   fontSize: 12,
+                        //   color: Colors.grey,
+                        // ),
+                        // margin: 10,
+                      ))),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 0.5,
                     ),
+                  ),
+                  lineBarsData: [
+                    for (int i = 0; i < 3; i++)
+                      LineChartBarData(
+                        spots: _dataList[i].asMap().entries.map((entry) {
+                          return FlSpot(
+                              entry.key.toDouble(), entry.value.value);
+                        }).toList(),
+                        isCurved: true,
+                        color: _lineColors[i],
+                        barWidth: 2,
+                        dotData: FlDotData(
+                          show: true,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: _resetStartTime,
+                    child: Text('Reset'),
+                  ),
+                  Text('Max Data Points: '),
+                  SizedBox(width: 10),
+                  DropdownButton<int>(
+                      value: _maxDataCount,
+                      onChanged: (value) {
+                        setState(() {
+                          _maxDataCount = value!;
+                        });
+                      },
+                      items: _maxDataCountList.map(
+                        (int value) {
+                          return DropdownMenuItem(
+                            value: value,
+                            child: Text(value.toString()),
+                          );
+                        },
+                      ).toList()),
                 ],
               ),
             ),
-          ),
-          SizedBox(
-            height: 50,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Max Data Points: '),
-                SizedBox(width: 10),
-                DropdownButton<int>(
-                  value: _maxDataCount,
-                  onChanged: (value) {
-                    setState(() {
-                      _maxDataCount = value!;
-                    });
-                  },
-                  items: [
-                    DropdownMenuItem(
-                      value: 30,
-                      child: Text('30'),
-                    ),
-                    DropdownMenuItem(
-                      value: 60,
-                      child: Text('60'),
-                    ),
-                    DropdownMenuItem(
-                      value: 90,
-                      child: Text('90'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
