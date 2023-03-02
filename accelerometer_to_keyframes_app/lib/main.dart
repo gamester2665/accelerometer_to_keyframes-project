@@ -38,15 +38,17 @@ class AccelerometerChartScreen extends StatefulWidget {
 }
 
 class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
-  List<ChartSampleData> _data = [];
+  List<List<ChartSampleData>> _data = [];
 
   @override
   void initState() {
     super.initState();
-    _data = <ChartSampleData>[];
+    _data = List.generate(3, (_) => <ChartSampleData>[]);
     accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
-        _data.add(ChartSampleData(DateTime.now(), event.z));
+        _data[0].add(ChartSampleData(DateTime.now(), event.x));
+        _data[1].add(ChartSampleData(DateTime.now(), event.y));
+        _data[2].add(ChartSampleData(DateTime.now(), event.z));
       });
     });
   }
@@ -57,19 +59,47 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
       appBar: AppBar(
         title: Text('Accelerometer Chart'),
       ),
-      body: Center(
-        child: Container(
-          child: SfCartesianChart(
-            primaryXAxis: DateTimeAxis(),
-            series: <ChartSeries<ChartSampleData, DateTime>>[
-              LineSeries<ChartSampleData, DateTime>(
-                dataSource: _data,
-                xValueMapper: (ChartSampleData data, _) => data.time,
-                yValueMapper: (ChartSampleData data, _) => data.value,
-              ),
-            ],
-          ),
-        ),
+      body: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Container(
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('x: ${_data[0].last.value.toStringAsFixed(2)}'),
+                Text('y: ${_data[1].last.value.toStringAsFixed(2)}'),
+                Text('z: ${_data[2].last.value.toStringAsFixed(2)}'),
+                SizedBox(height: 16),
+                Expanded(
+                  child: SfCartesianChart(
+                    primaryXAxis: DateTimeAxis(),
+                    series: <ChartSeries<ChartSampleData, DateTime>>[
+                      LineSeries<ChartSampleData, DateTime>(
+                        dataSource: _data[0],
+                        xValueMapper: (ChartSampleData data, _) => data.time,
+                        yValueMapper: (ChartSampleData data, _) => data.value,
+                        color: Colors.red,
+                      ),
+                      LineSeries<ChartSampleData, DateTime>(
+                        dataSource: _data[1],
+                        xValueMapper: (ChartSampleData data, _) => data.time,
+                        yValueMapper: (ChartSampleData data, _) => data.value,
+                        color: Colors.green,
+                      ),
+                      LineSeries<ChartSampleData, DateTime>(
+                        dataSource: _data[2],
+                        xValueMapper: (ChartSampleData data, _) => data.time,
+                        yValueMapper: (ChartSampleData data, _) => data.value,
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

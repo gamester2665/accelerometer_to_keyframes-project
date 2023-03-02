@@ -148,10 +148,10 @@ packages:
     dependency: "direct main"
     description:
       name: sensors_plus
-      sha256: "362c8f4f001838b90dd5206b898bbad941bc0142479eab9a3415f0f79e622908"
+      sha256: fe503a91f6551c6ce27ee7684cfbe4c5beced10671fa76f4a3bebfa9e3adab91
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.1"
+    version: "2.0.2"
   sensors_plus_platform_interface:
     dependency: transitive
     description:
@@ -160,14 +160,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.3"
-  sensors_plus_web:
-    dependency: transitive
-    description:
-      name: sensors_plus_web
-      sha256: fca8d7d9ab6233b2a059952666415508e252420be1ef54f092d07884da53ec5e
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -209,18 +201,18 @@ packages:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_charts
-      sha256: "0fba2a6a949308f6c2779195e8439f2c60064ad1b022abe8997f47b09e09fb6b"
+      sha256: "6faeb211311559f99f3c816b75aa493e68d1cc263f62dec530d5e8098b71bae4"
       url: "https://pub.dev"
     source: hosted
-    version: "19.4.56"
+    version: "20.4.52"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "9be1bb9bbdb42823439a18da71484f1964c14dbe1c255ab1b931932b12fa96e8"
+      sha256: "4319454a92fe5aea1e90ff68c17703a39517ab05dd3074c34c9553e5f7cbf414"
       url: "https://pub.dev"
     source: hosted
-    version: "19.4.56"
+    version: "20.4.52"
   term_glyph:
     dependency: transitive
     description:

@@ -37,8 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   # flutter_cupertino_date_picker: ^1.0.6
-  syncfusion_flutter_charts: ^19.4.46
-  sensors_plus: ^1.1.4
+  syncfusion_flutter_charts: ^20.4.52
+  sensors_plus: ^2.0.2
 
 dev_dependencies:
   flutter_test:
