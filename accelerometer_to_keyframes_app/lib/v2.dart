@@ -19,7 +19,7 @@ class AccelerometerChartScreen extends StatefulWidget {
 }
 
 class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
-  final List<List<ChartSampleData>> _dataList = [
+  List<List<ChartSampleData>> _dataList = [
     [], // for x values
     [], // for y values
     [], // for z values
@@ -31,6 +31,8 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
     Colors.blue, // for z values
   ];
   DateTime _startTime = DateTime.now();
+
+  Duration _duration = Duration.zero;
 
   int _maxDataCount = 30;
   List<int> _maxDataCountList = [30, 60, 90, 100];
@@ -44,24 +46,53 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
       setState(() {
         // Add new values to the data list
         DateTime now = DateTime.now();
+        _duration = now.difference(_startTime);
         _dataList[0].add(ChartSampleData(now, event.x));
         _dataList[1].add(ChartSampleData(now, event.y));
         _dataList[2].add(ChartSampleData(now, event.z));
 
+        // for _exxx
         // Only keep the last _maxDataCount values
-        if (_dataList[0].length > _maxDataCount) {
-          for (int i = 0; i < 3; i++) {
-            _dataList[i].removeAt(0);
-          }
-        }
+        // if (_dataList[0].length > _maxDataCount) {
+        //   for (int i = 0; i < 3; i++) {
+        //     _dataList[i].removeAt(0);
+        //   }
+        // }
       });
     });
   }
 
-  void _resetStartTime() {
+  void _resetChart() {
     setState(() {
       _startTime = DateTime.now();
+      _dataList = [
+        [], // for x values
+        [], // for y values
+        [], // for z values
+      ];
     });
+  }
+
+  List<Widget> _exxx() {
+    return [
+      Text('Max Data Points: '),
+      SizedBox(width: 10),
+      DropdownButton<int>(
+          value: _maxDataCount,
+          onChanged: (value) {
+            setState(() {
+              _maxDataCount = value!;
+            });
+          },
+          items: _maxDataCountList.map(
+            (int value) {
+              return DropdownMenuItem(
+                value: value,
+                child: Text(value.toString()),
+              );
+            },
+          ).toList()),
+    ];
   }
 
   @override
@@ -147,27 +178,11 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
-                    onPressed: _resetStartTime,
+                  OutlinedButton(
+                    onPressed: _resetChart,
                     child: Text('Reset'),
                   ),
-                  Text('Max Data Points: '),
-                  SizedBox(width: 10),
-                  DropdownButton<int>(
-                      value: _maxDataCount,
-                      onChanged: (value) {
-                        setState(() {
-                          _maxDataCount = value!;
-                        });
-                      },
-                      items: _maxDataCountList.map(
-                        (int value) {
-                          return DropdownMenuItem(
-                            value: value,
-                            child: Text(value.toString()),
-                          );
-                        },
-                      ).toList()),
+                  Text(_duration.toString())
                 ],
               ),
             ),
