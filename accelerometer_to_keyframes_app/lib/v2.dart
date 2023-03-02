@@ -5,6 +5,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
+class ChartSampleData {
+  final DateTime time;
+  final double value;
+
+  ChartSampleData(this.time, this.value);
+}
+
 class AccelerometerChartScreen extends StatefulWidget {
   @override
   _AccelerometerChartScreenState createState() =>
@@ -12,7 +19,7 @@ class AccelerometerChartScreen extends StatefulWidget {
 }
 
 class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
-  final List<List<FlSpot>> _spotsList = [
+  final List<List<ChartSampleData>> _dataList = [
     [], // for x values
     [], // for y values
     [], // for z values
@@ -24,27 +31,25 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
     Colors.blue, // for z values
   ];
 
+  int _maxDataCount = 30;
+
   @override
   void initState() {
     super.initState();
 
-    // Create empty spots
-    for (int i = 0; i < 3; i++) {
-      _spotsList[i] = [];
-    }
-
     // Start listening to accelerometer events
     accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
-        // Add new values to the spots
-        _spotsList[0].add(FlSpot(_spotsList[0].length.toDouble(), event.x));
-        _spotsList[1].add(FlSpot(_spotsList[1].length.toDouble(), event.y));
-        _spotsList[2].add(FlSpot(_spotsList[2].length.toDouble(), event.z));
+        // Add new values to the data list
+        DateTime now = DateTime.now();
+        _dataList[0].add(ChartSampleData(now, event.x));
+        _dataList[1].add(ChartSampleData(now, event.y));
+        _dataList[2].add(ChartSampleData(now, event.z));
 
-        // Only keep the last 30 values
-        if (_spotsList[0].length > 15) {
+        // Only keep the last _maxDataCount values
+        if (_dataList[0].length > _maxDataCount) {
           for (int i = 0; i < 3; i++) {
-            _spotsList[i].removeAt(0);
+            _dataList[i].removeAt(0);
           }
         }
       });
@@ -81,18 +86,27 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
                 titlesData: FlTitlesData(
                     bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
-                      showTitles: false,
+                      showTitles: true,
+
+                      getTitlesWidget: (double value, TitleMeta meta) {
+                        // Convert value to DateTime
+                        DateTime time = _dataList[0][value.toInt()].time;
+                        // Format time as HH:mm:ss
+                        return Text(
+                            '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}');
+                      },
+                      // margin: 8
                     )),
                     leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        interval: 2,
-                        // textStyle: TextStyle(
-                        //   fontSize: 12,
-                        // ),
-                        // margin: 10,
-                      ),
-                    )),
+                        sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 2,
+                      // textStyle: TextStyle(
+                      //   fontSize: 12,
+                      //   color: Colors.grey,
+                      // ),
+                      // margin: 10,
+                    ))),
                 borderData: FlBorderData(
                   show: true,
                   border: Border.all(
@@ -103,16 +117,50 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
                 lineBarsData: [
                   for (int i = 0; i < 3; i++)
                     LineChartBarData(
-                      spots: _spotsList[i],
+                      spots: _dataList[i].asMap().entries.map((entry) {
+                        return FlSpot(entry.key.toDouble(), entry.value.value);
+                      }).toList(),
                       isCurved: true,
                       color: _lineColors[i],
                       barWidth: 2,
                       dotData: FlDotData(
-                        show: false,
+                        show: true,
                       ),
                     ),
                 ],
               ),
+            ),
+          ),
+          SizedBox(
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Max Data Points: '),
+                SizedBox(width: 10),
+                DropdownButton<int>(
+                  value: _maxDataCount,
+                  onChanged: (value) {
+                    setState(() {
+                      _maxDataCount = value!;
+                    });
+                  },
+                  items: [
+                    DropdownMenuItem(
+                      value: 30,
+                      child: Text('30'),
+                    ),
+                    DropdownMenuItem(
+                      value: 60,
+                      child: Text('60'),
+                    ),
+                    DropdownMenuItem(
+                      value: 90,
+                      child: Text('90'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
