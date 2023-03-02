@@ -182,74 +182,7 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(
-              child: LineChart(
-                LineChartData(
-                  lineTouchData: LineTouchData(enabled: false),
-                  gridData: FlGridData(
-                    show: true,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey,
-                        strokeWidth: 0.5,
-                      );
-                    },
-                    getDrawingVerticalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey,
-                        strokeWidth: 0.5,
-                      );
-                    },
-                  ),
-                  titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                        showTitles: true,
-
-                        getTitlesWidget: (double value, TitleMeta meta) {
-                          // Convert value to DateTime
-                          DateTime time = _dataList[0][value.toInt()].time;
-                          // Format time as HH:mm:ss
-                          return Text(
-                              '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}');
-                        },
-                        // margin: 8
-                      )),
-                      leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                        showTitles: true,
-                        interval: 2,
-                        // textStyle: TextStyle(
-                        //   fontSize: 12,
-                        //   color: Colors.grey,
-                        // ),
-                        // margin: 10,
-                      ))),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 0.5,
-                    ),
-                  ),
-                  lineBarsData: [
-                    for (int i = 0; i < 3; i++)
-                      LineChartBarData(
-                        spots: _dataList[i].asMap().entries.map((entry) {
-                          return FlSpot(
-                              entry.key.toDouble(), entry.value.value);
-                        }).toList(),
-                        isCurved: true,
-                        color: _lineColors[i],
-                        barWidth: 2,
-                        dotData: FlDotData(
-                          show: true,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
+            LineChartPage(_dataList, _lineColors),
             SizedBox(
               height: 50,
               child: Row(
@@ -275,5 +208,93 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
         ),
       ),
     );
+  }
+}
+
+class LineChartPage extends StatefulWidget {
+  List<List<ChartSampleData>>? dataList;
+  List<Color>? lineColors;
+
+  // const LineChartPage({super.key})
+  LineChartPage(this.dataList, this.lineColors);
+
+  @override
+  State<LineChartPage> createState() => _LineChartPageState();
+}
+
+class _LineChartPageState extends State<LineChartPage> {
+  @override
+  Widget build(BuildContext context) {
+    if (widget.dataList != null) {
+      return Expanded(
+        child: LineChart(
+          LineChartData(
+            lineTouchData: LineTouchData(enabled: false),
+            gridData: FlGridData(
+              show: true,
+              getDrawingHorizontalLine: (value) {
+                return FlLine(
+                  color: Colors.grey,
+                  strokeWidth: 0.5,
+                );
+              },
+              getDrawingVerticalLine: (value) {
+                return FlLine(
+                  color: Colors.grey,
+                  strokeWidth: 0.5,
+                );
+              },
+            ),
+            titlesData: FlTitlesData(
+                bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                  showTitles: true,
+
+                  getTitlesWidget: (double value, TitleMeta meta) {
+                    // Convert value to DateTime
+                    DateTime time = widget.dataList![0][value.toInt()].time;
+                    // Format time as HH:mm:ss
+                    return Text(
+                        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}');
+                  },
+                  // margin: 8
+                )),
+                leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                  showTitles: true,
+                  interval: 2,
+                  // textStyle: TextStyle(
+                  //   fontSize: 12,
+                  //   color: Colors.grey,
+                  // ),
+                  // margin: 10,
+                ))),
+            borderData: FlBorderData(
+              show: true,
+              border: Border.all(
+                color: Colors.grey,
+                width: 0.5,
+              ),
+            ),
+            lineBarsData: [
+              for (int i = 0; i < 3; i++)
+                LineChartBarData(
+                  spots: widget.dataList![i].asMap().entries.map((entry) {
+                    return FlSpot(entry.key.toDouble(), entry.value.value);
+                  }).toList(),
+                  isCurved: true,
+                  color: widget.lineColors![i],
+                  barWidth: 2,
+                  dotData: FlDotData(
+                    show: true,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Text('Ahahaha');
+    }
   }
 }
