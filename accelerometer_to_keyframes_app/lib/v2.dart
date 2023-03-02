@@ -12,6 +12,46 @@ class ChartSampleData {
   ChartSampleData(this.time, this.value);
 }
 
+class MotionSampleData {
+  final DateTime time;
+  final double x;
+  final double y;
+  final double z;
+
+  MotionSampleData(this.time, this.x, this.y, this.z);
+}
+
+class MyAnimation {
+  DateTime _startTime;
+  Duration _duration;
+
+  double _startX;
+  double _startY;
+  double _startZ;
+
+  double _dx;
+  double _dy;
+  double _dz;
+
+  MyAnimation(this._startTime, this._duration, this._startX, this._startY,
+      this._startZ, this._dx, this._dy, this._dz);
+
+  // Get the position at a specific point in time
+  double getPosition(DateTime time) {
+    // Calculate the elapsed time
+    Duration elapsedTime = time.difference(_startTime);
+    double dt = elapsedTime.inSeconds.toDouble();
+
+    // Calculate the position using the displacement equations
+    double x = _startX + _dx * dt;
+    double y = _startY + _dy * dt;
+    double z = _startZ + _dz * dt;
+
+    // Return the y position
+    return y;
+  }
+}
+
 class AccelerometerChartScreen extends StatefulWidget {
   @override
   _AccelerometerChartScreenState createState() =>
@@ -24,6 +64,8 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
     [], // for y values
     [], // for z values
   ];
+
+  List<MotionSampleData> _dataList2 = [];
 
   final List<Color> _lineColors = [
     Colors.red, // for x values
@@ -39,23 +81,84 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
 
   AccelerometerEvent? _latestEvent;
 
+  double _x = 0;
+  double _y = 0;
+  double _z = 0;
+  double _roll = 0;
+  double _pitch = 0;
+
+  double _gx = 0;
+  DateTime _lastTime = DateTime.now();
+  double _vx = 0;
+  double _vy = 0;
+  double _vz = 0;
+  double _dx = 0;
+  double _dy = 0;
+  double _dz = 0;
+
   @override
   void initState() {
     super.initState();
 
-    // Start listening to accelerometer events
+// MyAnimation animation = MyAnimation(startTime, duration, startX, startY, startZ, dx, dy, dz);
+// double positionAt3Seconds = animation.getPosition(startTime.add(Duration(seconds: 3)));
+
+    void calculateVelocityAndDisplacement(double vx, double dt) {
+      DateTime now = DateTime.now();
+
+      _vx += vx;
+      _vy += _y * dt;
+      _vz += _z * dt;
+
+      _dx += _vx * dt;
+      _dy += _vy * dt;
+      _dz += _vz * dt;
+
+      _dataList2.add(MotionSampleData(now, _dx, _dy, _dz));
+
+      // _dataList[0].add(ChartSampleData(now, _dx));
+      // _dataList[1].add(ChartSampleData(now, _dy));
+      // _dataList[2].add(ChartSampleData(now, _dz));
+    }
+
+// Start listening to accelerometer events
     accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
-        // Add new values to the data list
         DateTime now = DateTime.now();
+        _x = event.x;
+        _y = event.y;
+        _z = event.z;
+        _roll = atan2(_y, _z);
+        _pitch = atan2(-_x, sqrt(_y * _y + _z * _z));
+
         _duration = now.difference(_startTime);
-        _dataList[0].add(ChartSampleData(now, event.x));
-        _dataList[1].add(ChartSampleData(now, event.y));
-        _dataList[2].add(ChartSampleData(now, event.z));
+        _dataList[0].add(ChartSampleData(now, _x));
+        _dataList[1].add(ChartSampleData(now, _y));
+        _dataList[2].add(ChartSampleData(now, _z));
 
         _latestEvent = event;
       });
     });
+
+    gyroscopeEvents.listen((GyroscopeEvent event) {
+      // handle gyroscope data
+
+      setState(() {
+        DateTime now = DateTime.now();
+        Duration delta = now.difference(_lastTime);
+        _lastTime = now;
+
+        _gx = event.x;
+        double dt = delta.inMilliseconds.toDouble() / 1000.0;
+        double vx = _gx * dt;
+
+        calculateVelocityAndDisplacement(vx, dt);
+      });
+    });
+
+    // Timer.periodic(Duration(seconds: 1), (timer) {
+
+    // });
   }
 
   void _resetChart() {
@@ -162,7 +265,7 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
                         style: TextStyle(color: _lineColors[0])),
                     Text(_latestEvent!.y.ceilToDouble().toString(),
                         style: TextStyle(color: _lineColors[1])),
-                    Text(_latestEvent!.z.toDouble().toString(),
+                    Text(_latestEvent!.z.ceilToDouble().toString(),
                         style: TextStyle(color: _lineColors[2])),
                   ]
                 ],
