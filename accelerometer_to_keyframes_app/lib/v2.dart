@@ -37,6 +37,8 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
   int _maxDataCount = 30;
   List<int> _maxDataCountList = [30, 60, 90, 100];
 
+  AccelerometerEvent? _latestEvent;
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +52,8 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
         _dataList[0].add(ChartSampleData(now, event.x));
         _dataList[1].add(ChartSampleData(now, event.y));
         _dataList[2].add(ChartSampleData(now, event.z));
+
+        _latestEvent = event;
 
         // for _exxx
         // Only keep the last _maxDataCount values
@@ -73,27 +77,27 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
     });
   }
 
-  List<Widget> _exxx() {
-    return [
-      Text('Max Data Points: '),
-      SizedBox(width: 10),
-      DropdownButton<int>(
-          value: _maxDataCount,
-          onChanged: (value) {
-            setState(() {
-              _maxDataCount = value!;
-            });
-          },
-          items: _maxDataCountList.map(
-            (int value) {
-              return DropdownMenuItem(
-                value: value,
-                child: Text(value.toString()),
-              );
-            },
-          ).toList()),
-    ];
-  }
+  // List<Widget> _exxx() {
+  //   return [
+  //     Text('Max Data Points: '),
+  //     SizedBox(width: 10),
+  //     DropdownButton<int>(
+  //         value: _maxDataCount,
+  //         onChanged: (value) {
+  //           setState(() {
+  //             _maxDataCount = value!;
+  //           });
+  //         },
+  //         items: _maxDataCountList.map(
+  //           (int value) {
+  //             return DropdownMenuItem(
+  //               value: value,
+  //               child: Text(value.toString()),
+  //             );
+  //           },
+  //         ).toList()),
+  //   ];
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +186,15 @@ class _AccelerometerChartScreenState extends State<AccelerometerChartScreen> {
                     onPressed: _resetChart,
                     child: Text('Reset'),
                   ),
-                  Text(_duration.toString())
+                  Text(_duration.toString()),
+                  if (_latestEvent != null) ...[
+                    Text(_latestEvent!.x.toString(),
+                        style: TextStyle(color: _lineColors[0])),
+                    Text(_latestEvent!.y.toString(),
+                        style: TextStyle(color: _lineColors[1])),
+                    Text(_latestEvent!.z.toString(),
+                        style: TextStyle(color: _lineColors[2])),
+                  ]
                 ],
               ),
             ),
